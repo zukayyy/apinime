@@ -2,7 +2,7 @@
  * /anime/* — Semua endpoint sumber Ylnime (anime).
  */
 const express = require('express');
-const yn = require('../core/ylnime');
+const yn = require('../core/samehadaku');
 
 const router = express.Router();
 const CREATOR = global.creator || 'Zunime';
