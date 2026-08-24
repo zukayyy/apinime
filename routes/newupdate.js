@@ -2,7 +2,7 @@
  * /newupdate/* — Gabungan update terbaru dari semua sumber.
  */
 const express = require('express');
-const yn = require('../core/samehadaku');
+const yn = require('../core/animeindo');
 const komiku = require('../core/komiku');
 
 const router = express.Router();

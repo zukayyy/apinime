@@ -2,7 +2,7 @@
  * /anime/* — Semua endpoint sumber Samehadaku (anime).
  */
 const express = require('express');
-const yn = require('../core/samehadaku');
+const yn = require('../core/animeindo');
 
 const router = express.Router();
 const CREATOR = global.creator || 'Zunime';
@@ -24,7 +24,7 @@ router.get('/list', async (req, res) => {
     } catch (e) { fail(res, e); }
 });
 
-// Arsip dengan filter asli samehadaku.
+// Arsip dengan filter (dipetakan ke halaman bawaan animeindo).
 router.get('/browse', async (req, res) => {
     try {
         const q = req.query;
@@ -42,7 +42,7 @@ router.get('/browse', async (req, res) => {
     } catch (e) { fail(res, e); }
 });
 
-// Opsi filter asli dari form samehadaku.
+// Opsi filter untuk app.
 router.get('/filters', async (req, res) => {
     try {
         ok(res, await yn.filters());
