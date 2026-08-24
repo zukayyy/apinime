@@ -19,6 +19,16 @@ app.use('/anime', require('./routes/anime'));
 app.use('/manga', require('./routes/manga'));
 app.use('/manhwa', require('./routes/manhwa'));
 app.use('/manhua', require('./routes/manhua'));
+app.use('/newupdate', require('./routes/newupdate'));
+
+// ── Dokumentasi ─────────────────────────────────────────────────────────────
+const ENDPOINTS = require('./lib/endpoints');
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.get('/docs', (req, res) => {
+    const base = `${req.protocol}://${req.get('host')}`;
+    res.render('docs', { base, endpoints: ENDPOINTS, creator: global.creator });
+});
 
 // ── Index ───────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
@@ -29,6 +39,8 @@ app.get('/', (req, res) => {
         name: 'Apinime',
         description: 'API scraping anime & manga untuk Zunime',
         endpoints: {
+            docs: `${base}/docs`,
+            newUpdateAll: `${base}/newupdate/all`,
             anime: {
                 home: `${base}/anime/home`,
                 list: `${base}/anime/list?type=ongoing|completed|movie|baru|rekomendasi`,

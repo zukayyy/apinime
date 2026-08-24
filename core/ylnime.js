@@ -257,7 +257,8 @@ async function detail(slug) {
         if (!m) return;
         const id = safeDecode(m[1]);
         if (epsMap.has(id)) return;
-        const label = a.text().trim() || id;
+        // Bersihkan newline/tanggal: ambil segmen teks pertama saja.
+        const label = (a.text().replace(/\s+/g, ' ').trim().split(/\s\d{1,2} \w{3}, /)[0] || id).trim();
         epsMap.set(id, { id, label, number: episodeNumber(label) });
     });
     const episodes = [...epsMap.values()].sort((a, b) =>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apinime — Dokumentasi API</title>
+<style>
+  :root {
+    --bg: #0d0d12;
+    --card: #16161e;
+    --border: #26262f;
+    --accent: #e50914;
+    --accent2: #7c4dff;
+    --text: #ececf1;
+    --muted: #9a9aa8;
+    --green: #2ecc71;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    padding-bottom: 60px;
+  }
+  header {
+    background: linear-gradient(135deg, rgba(229,9,20,.18), rgba(124,77,255,.15));
+    border-bottom: 1px solid var(--border);
+    padding: 40px 20px 30px;
+    text-align: center;
+  }
+  header h1 { font-size: 2rem; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--muted); margin-top: 6px; }
+  .badge {
+    display: inline-block; margin-top: 12px; padding: 4px 14px;
+    border-radius: 999px; background: rgba(46,204,113,.12);
+    color: var(--green); font-size: .8rem; font-weight: 600;
+    border: 1px solid rgba(46,204,113,.3);
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
+  section { margin-top: 34px; }
+  h2.group {
+    font-size: 1.25rem; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .prefix-note { color: var(--muted); font-size: .85rem; margin-bottom: 12px; }
+  .endpoint {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .ep-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .method {
+    font-size: .7rem; font-weight: 800; letter-spacing: .5px;
+    padding: 3px 9px; border-radius: 6px;
+    background: rgba(46,204,113,.15); color: var(--green);
+  }
+  code.path {
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: .88rem; color: var(--accent2); word-break: break-all;
+  }
+  .desc { color: var(--muted); font-size: .88rem; margin-top: 6px; }
+  table.params { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: .82rem; }
+  table.params td { padding: 3px 10px 3px 0; color: var(--muted); }
+  table.params td:first-child { color: var(--accent2); font-family: monospace; white-space: nowrap; }
+  a.try {
+    display: inline-block; margin-top: 8px; font-size: .8rem;
+    color: var(--accent); text-decoration: none; font-weight: 600;
+  }
+  a.try:hover { text-decoration: underline; }
+  .flow {
+    background: linear-gradient(135deg, rgba(229,9,20,.08), rgba(124,77,255,.08));
+    border: 1px dashed var(--accent);
+    border-radius: 12px; padding: 16px 18px; margin-top: 30px;
+    font-size: .9rem;
+  }
+  .flow ol { margin-left: 18px; }
+  footer { text-align: center; margin-top: 50px; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>API<span>nime</span></h1>
+  <p>Dokumentasi lengkap — scraping anime & manga untuk Zunime</p>
+  <span class="badge">● ONLINE</span>
+</header>
+
+<div class="container">
+  <section class="flow">
+    <strong>📌 Alur nonton anime:</strong>
+    <ol>
+      <li><code>/anime/list?type=ongoing</code> → ambil slug seri</li>
+      <li><code>/anime/detail?slug=...</code> → dapatkan ID tiap episode</li>
+      <li><code>/anime/streams?slug=...&amp;ep=ID_INTERNAL</code> → URL video per kualitas (360p–1080p)</li>
+    </ol>
+  </section>
+
+  <% endpoints.forEach(group => { %>
+  <section>
+    <h2 class="group"><%= group.icon %> <%= group.group %></h2>
+    <% if (group.prefixNote) { %><div class="prefix-note"><%= group.prefixNote %></div><% } %>
+    <% group.items.forEach(item => { %>
+    <div class="endpoint">
+      <div class="ep-head">
+        <span class="method"><%= item.m %></span>
+        <code class="path"><%= item.p %></code>
+      </div>
+      <div class="desc"><%= item.d %></div>
+      <% if (item.params) { %>
+      <table class="params">
+        <% Object.entries(item.params).forEach(([k, v]) => { %>
+        <tr><td><%= k %></td><td><%= v %></td></tr>
+        <% }) %>
+      </table>
+      <% } %>
+      <a class="try" href="<%= base + item.p %>" target="_blank">▶ Coba endpoint ini →</a>
+    </div>
+    <% }) %>
+  </section>
+  <% }) %>
+
+  <footer>
+    Dibuat dengan 🖤 oleh <strong><%= creator %></strong> · Apinime v1.0 · sumber: ylnime.com & komiku.org
+  </footer>
+</div>
+</body>
+</html>

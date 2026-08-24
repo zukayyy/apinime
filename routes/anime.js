@@ -65,9 +65,21 @@ router.get('/streams', async (req, res) => {
         const slug = String(req.query.slug || '').trim();
         const ep = String(req.query.ep || '').trim();
         if (!slug || !ep) {
-            return res.status(400).json({ status: false, creator: CREATOR, message: 'Parameter "slug" dan "ep" wajib diisi!' });
+            return res.status(400).json({
+                status: false,
+                creator: CREATOR,
+                message: 'Parameter "slug" dan "ep" wajib diisi. "ep" adalah ID internal dari endpoint /anime/detail (bukan nomor episode).'
+            });
         }
-        ok(res, await yn.streams(slug, ep));
+        const data = await yn.streams(slug, ep);
+        if (!data.sources.length) {
+            return res.status(404).json({
+                status: false,
+                creator: CREATOR,
+                message: 'Video episode ini belum tersedia. Coba episode lain atau kualitas berbeda.'
+            });
+        }
+        ok(res, data);
     } catch (e) { fail(res, e, 'Gagal mengambil sumber video.'); }
 });
 
