@@ -145,7 +145,22 @@ const LIST_TYPES = {
 
 async function listByType(type) {
     const path = LIST_TYPES[type] || LIST_TYPES.ongoing;
-    return list(path);
+    const items = await list(path);
+
+    // Enrich items with no status by cross-referencing ongoing/completed lists.
+    if (type === 'baru' || type === 'home' || type === 'rekomendasi') {
+        const [ongoing, completed] = await Promise.all([
+            list(LIST_TYPES.ongoing).catch(() => []),
+            list(LIST_TYPES.completed).catch(() => [])
+        ]);
+        const statusMap = new Map();
+        ongoing.forEach(it => { if (it.slug) statusMap.set(it.slug, 'Ongoing'); });
+        completed.forEach(it => { if (it.slug) statusMap.set(it.slug, 'Tamat'); });
+        items.forEach(it => {
+            if (!it.status && statusMap.has(it.slug)) it.status = statusMap.get(it.slug);
+        });
+    }
+    return items;
 }
 
 async function search(q) {
@@ -227,12 +242,13 @@ async function detail(slug) {
         synopsis = best || null;
     }
 
-    const statusValues = ['Sedang Tayang', 'Completed', 'Ongoing', 'Tamat', 'Movie', 'Serial'];
+    const statusValues = ['Sedang Tayang', 'Completed', 'Ongoing', 'Tamat', 'Movie', 'Serial', 'Berlangsung'];
     let status = null;
-    $('span, b, p, div').each((_, el) => {
+    // Cari badge status (bg-success / bg-warning) yang berisi ikon, bukan angka episode.
+    $('span.badge').each((_, el) => {
         if (status) return;
-        const own = $(el).clone().children().remove().end().text().trim().replace(/,+$/, '');
-        if (statusValues.includes(own)) status = own;
+        const t = $(el).text().trim().replace(/,+$/, '');
+        if (t && !/^\d+$/.test(t) && statusValues.some(v => t.includes(v))) status = t;
     });
 
     let rating = null;
