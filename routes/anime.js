@@ -24,6 +24,31 @@ router.get('/list', async (req, res) => {
     } catch (e) { fail(res, e); }
 });
 
+// Arsip dengan filter asli samehadaku.
+router.get('/browse', async (req, res) => {
+    try {
+        const q = req.query;
+        const data = await yn.browse({
+            status: String(q.status || ''),
+            type: String(q.type || ''),
+            sub: String(q.sub || ''),
+            order: String(q.order || 'update'),
+            genre: String(q.genre || ''),
+            season: String(q.season || ''),
+            studio: String(q.studio || ''),
+            page: parseInt(String(q.page || '1'), 10) || 1
+        });
+        ok(res, data, { page: parseInt(String(q.page || '1'), 10) || 1 });
+    } catch (e) { fail(res, e); }
+});
+
+// Opsi filter asli dari form samehadaku.
+router.get('/filters', async (req, res) => {
+    try {
+        ok(res, await yn.filters());
+    } catch (e) { fail(res, e); }
+});
+
 router.get('/search', async (req, res) => {
     try {
         const q = String(req.query.q || '').trim();

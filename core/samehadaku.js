@@ -334,4 +334,65 @@ async function schedule() {
     return [{ day: 'Rilisan Berjalan', items }];
 }
 
-module.exports = { BASE, getHtml, list, listByType, LIST_TYPES, search, genres, byGenre, detail, streams, schedule, parseCards, decodeEntities };
+/**
+ * Arsip dengan filter asli samehadaku.
+ * Param: status (ongoing/completed/upcoming/hiatus), type (tv/ova/movie/live action/special/bd/ona/music),
+ * sub (sub/dub/raw), order (title/titlereverse/update/latest/popular/rating), genre, season, studio, page.
+ */
+async function browse({ status = '', type = '', sub = '', order = 'update', genre = '', season = '', studio = '', page = 1 } = {}) {
+    const params = new URLSearchParams();
+    if (page > 1) params.set('page', String(page));
+    if (status) params.set('status', status);
+    if (type) params.set('type', type);
+    if (sub) params.set('sub', sub);
+    if (order) params.set('order', order);
+    if (genre) params.append('genre[]', genre);
+    if (season) params.append('season[]', season);
+    if (studio) params.append('studio[]', studio);
+    const qs = params.toString();
+    const html = await getHtml(`/anime/${qs ? '?' + qs : ''}`);
+    const $ = cheerio.load(html);
+    return parseCards($);
+}
+
+/**
+ * Opsi filter asli dari form quickfilter halaman /anime/.
+ */
+async function filters() {
+    const html = await getHtml('/anime/');
+    const radios = {};
+    for (const m of html.matchAll(/<input type="radio"[^>]*name="([^"]+)"[^>]*value="([^"]*)"[^>]*>(?:[^<]*<label[^>]*>([^<]*)<\/label>)?/g)) {
+        const [, name, value, label] = m;
+        (radios[name] = radios[name] || []).push({
+            value,
+            label: (label || '').trim() ||
+                (value === '' ? 'Semua' : value.charAt(0).toUpperCase() + value.slice(1))
+        });
+    }
+    // Buang duplikat radio yang muncul dua kali (desktop + mobile form).
+    const dedupe = arr => {
+        const seen = new Set();
+        return arr.filter(o => !seen.has(o.value) && seen.add(o.value));
+    };
+    const uniqByValue = arr => {
+        const seen = new Set();
+        return arr.filter(o => !seen.has(o.value) && seen.add(o.value));
+    };
+    const genres = uniqByValue([...html.matchAll(/name="genre\[\]" value="([^"]+)">/g)].map(m => ({
+        value: m[1],
+        label: m[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    })));
+    const seasons = uniqByValue([...html.matchAll(/name="season\[\]" value="([^"]+)">/g)].map(m => ({ value: m[1], label: m[1] })));
+    const studios = uniqByValue([...html.matchAll(/name="studio\[\]" value="([^"]+)">/g)].map(m => ({ value: m[1], label: m[1] })));
+    return {
+        status: dedupe(radios.status || []),
+        type: dedupe(radios.type || []),
+        sub: dedupe(radios.sub || []),
+        order: dedupe(radios.order || []),
+        genre: genres,
+        season: seasons,
+        studio: studios
+    };
+}
+
+module.exports = { BASE, getHtml, list, listByType, LIST_TYPES, search, genres, byGenre, detail, streams, schedule, browse, filters, parseCards, decodeEntities };
