@@ -215,19 +215,28 @@ async function streams(_slug, epPath) {
     if (!seriesTitle) seriesTitle = pageTitle;
 
     // Iframe player utama (putarin.com/e/{CODE}).
-    let videoUrl = null;
     const iframeSrc = ($('iframe[src*="putarin"]').first().attr('src')) ||
                       (body.match(/<iframe[^>]*src="(https:\/\/putarin\.com\/e\/[^"]+)"/i) || [])[1];
-    if (iframeSrc) {
-        const codeMatch = iframeSrc.match(/\/e\/([^"?/]+)/);
-        if (codeMatch) videoUrl = await resolvePutarin(codeMatch[1]);
+    const codeMatch = iframeSrc ? iframeSrc.match(/\/e\/([^"?/]+)/) : null;
+    const putarinCode = codeMatch ? codeMatch[1] : null;
+
+    // Fallback: coba resolve di sisi server (kadang dibatasi WAF per-IP).
+    let videoUrl = null;
+    let qualities = [];
+    let sources = [];
+    if (putarinCode) {
+        try {
+            videoUrl = await resolvePutarin(putarinCode);
+            sources = [{ reso: 'HLS', url: videoUrl }];
+            qualities = ['HLS'];
+        } catch { /* app akan resolve sendiri via putarinCode */ }
     }
 
-    const sources = videoUrl ? [{ reso: 'HLS', url: videoUrl }] : [];
     return {
         seriesTitle,
         episodeLabel: epMatch ? epMatch[0].trim() : 'Episode',
-        qualities: sources.length ? ['HLS'] : [],
+        putarinCode,
+        qualities,
         sources
     };
 }

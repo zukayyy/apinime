@@ -97,7 +97,7 @@ router.get('/streams', async (req, res) => {
             });
         }
         const data = await yn.streams(slug, ep);
-        if (!data.sources.length) {
+        if (!data.sources.length && !data.putarinCode) {
             return res.status(404).json({
                 status: false,
                 creator: CREATOR,
