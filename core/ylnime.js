@@ -89,7 +89,8 @@ function parseCards($, scope) {
         const href = a.attr('href') || '';
         const m = href.match(/[?&]series=([^&]+)/);
         if (!m) return;
-        const slug = safeDecode(m[1]);
+        // Normalisasi slug: buang trailing "/" agar konsisten antar halaman.
+        const slug = safeDecode(m[1]).replace(/\/+$/, '');
         const card = a.closest('.card');
         if (!card.length) return;
         const img = card.find('img').first();
@@ -145,22 +146,7 @@ const LIST_TYPES = {
 
 async function listByType(type) {
     const path = LIST_TYPES[type] || LIST_TYPES.ongoing;
-    const items = await list(path);
-
-    // Enrich items with no status by cross-referencing ongoing/completed lists.
-    if (type === 'baru' || type === 'home' || type === 'rekomendasi') {
-        const [ongoing, completed] = await Promise.all([
-            list(LIST_TYPES.ongoing).catch(() => []),
-            list(LIST_TYPES.completed).catch(() => [])
-        ]);
-        const statusMap = new Map();
-        ongoing.forEach(it => { if (it.slug) statusMap.set(it.slug, 'Ongoing'); });
-        completed.forEach(it => { if (it.slug) statusMap.set(it.slug, 'Tamat'); });
-        items.forEach(it => {
-            if (!it.status && statusMap.has(it.slug)) it.status = statusMap.get(it.slug);
-        });
-    }
-    return items;
+    return list(path);
 }
 
 async function search(q) {
