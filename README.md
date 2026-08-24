@@ -1,6 +1,6 @@
 # Apinime
 
-API scraping untuk aplikasi **Zunime** — sumber anime dari **ylnime.com** dan manga/manhwa/manhua dari **komiku.org**.
+API scraping untuk aplikasi **Zunime** — sumber anime dari **samehadaku.li** (stream embed Blogger) dan manga/manhwa/manhua dari **komiku.org**.
 
 Siap deploy ke **Vercel** (satu fungsi `server.js` via `@vercel/node`) atau jalan mandiri.
 
@@ -12,7 +12,7 @@ npm start          # http://localhost:3000
 npm test           # smoke test semua endpoint utama (server harus jalan)
 ```
 
-## Endpoint — Anime (ylnime.com)
+## Endpoint — Anime (samehadaku.li)
 
 | Endpoint | Keterangan |
 |---|---|

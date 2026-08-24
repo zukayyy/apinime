@@ -1,5 +1,5 @@
 /**
- * Apinime — API scraping anime (ylnime.com) & manga (komiku.org) untuk Zunime.
+ * Apinime — API scraping anime (samehadaku.li) & manga (komiku.org) untuk Zunime.
  * Siap deploy ke Vercel (@vercel/node) atau jalan mandiri: npm start
  */
 const express = require('express');

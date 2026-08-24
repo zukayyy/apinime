@@ -1,5 +1,5 @@
 /**
- * /anime/* — Semua endpoint sumber Ylnime (anime).
+ * /anime/* — Semua endpoint sumber Samehadaku (anime).
  */
 const express = require('express');
 const yn = require('../core/samehadaku');

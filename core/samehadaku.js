@@ -82,7 +82,8 @@ function parseCards($) {
     const seen = new Set();
     $('article.bs .bsx').each((_, el) => {
         const card = $(el);
-        const a = card.find('a.tip').first();
+        // Anchor utama bisa a.tip (archive/search) atau a biasa dengan href /anime/.
+        const a = card.find('a[href*="/anime/"]').first();
         const slug = slugFromSeriesUrl(a.attr('href') || '');
         if (!slug || seen.has(slug)) return;
         let title = a.attr('title') || card.find('img').attr('alt') || a.text() || '';
@@ -124,10 +125,43 @@ const LIST_TYPES = {
     completed: '/anime/?status=completed&order=update',
     movie: '/anime/?type=movie&order=update',
     baru: '/',
-    rekomendasi: '/anime/?order=popular'
+    rekomendasi: '/anime/?order=update'
 };
 
+/**
+ * Kartu di beranda adalah kartu EPISODE ("{Series} Episode N Subtitle Indonesia").
+ * Ubah menjadi kartu series agar konsisten dengan kontrak API.
+ */
+function parseEpisodeCards($) {
+    const out = [];
+    const seen = new Set();
+    $('article.bs .bsx').each((_, el) => {
+        const card = $(el);
+        const a = card.find('a[href*="-episode-"]').first();
+        const href = a.attr('href') || '';
+        const m = href.match(/\/([^/?#]+)-episode-\d+(?:-\d+)?-subtitle-indonesia\/?$/);
+        if (!m) return;
+        const slug = m[1];
+        if (!slug || seen.has(slug)) return;
+        const title = decodeEntities(a.attr('title') || '')
+            .replace(/\s*Episode\s+\d+(?:-\d+)?\s*/i, ' ')
+            .replace(/Subtitle\s+Indonesia/i, '')
+            .trim() || slug;
+        const img = card.find('img').first();
+        const rawSrc = img.attr('src') || '';
+        const cover = !rawSrc.startsWith('data:') ? rawSrc
+            : (img.attr('data-src') || img.attr('data-lazy-src') || null);
+        seen.add(slug);
+        out.push({ slug, title, cover, rating: null, status: null });
+    });
+    return out;
+}
+
 async function listByType(type) {
+    if (type === 'baru' || type === 'home') {
+        const html = await getHtml('/');
+        return parseEpisodeCards(cheerio.load(html));
+    }
     const path = LIST_TYPES[type] || LIST_TYPES.ongoing;
     return list(path);
 }
